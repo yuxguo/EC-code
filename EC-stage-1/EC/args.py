@@ -2,17 +2,12 @@ import os
 
 
 class Args(object):
-    def __init__(self, seed=0, gener_level="l1_inpo", dump_message=False, symbol_onehot_dim=20):
+    def __init__(self):
         
-        self.seed = seed
-        self.gener_level = gener_level # [l1_inpo, l1_expo, l2_inpo, l2_expo]
-        self.symbol_onehot_dim = symbol_onehot_dim
-
         # CUDA part
 
         # self.cuda_visible_devices = "0, 1, 2, 3"
-        
-        self.cuda_visible_devices = "%d" % (self.seed % 8)
+        self.cuda_visible_devices = "0"
         # self.cuda_visible_devices = "2, 3"
 
 
@@ -26,8 +21,8 @@ class Args(object):
         self.speaker_freeze = False
         self.listener_freeze = False
 
-        self.speaker_use_pretrain_model = True
-        self.speaker_pretrain_path = "./dump_paper/4x15_warmup_88_%d/checkpoints/best_epoch.pth" % (self.symbol_onehot_dim)
+        self.speaker_use_pretrain_model = False
+        self.speaker_pretrain_path = "./dump/SCL_egg_4x10_spo_symbol_r_cs_10k_num/checkpoints/best_epoch.pth"
         self.speaker_pretrain_params_key = "speaker"
 
         self.listener_use_pretrain_model = False
@@ -41,7 +36,7 @@ class Args(object):
         assert not(self.max_pooling_message_embedding and self.mlp_pooling_message_embedding)
 
 
-        self.image_embedding_dim = 4 * self.symbol_onehot_dim # 80, 120, 160
+        self.image_embedding_dim = 120
         self.message_embedding_dim = 5 * self.image_embedding_dim if not self.max_pooling_message_embedding and not self.mlp_pooling_message_embedding else 80
         
 
@@ -73,6 +68,11 @@ class Args(object):
         self.listener_reset = False
         self.listener_reset_times = 50
         self.listener_reset_cycle = 20
+
+        self.symbol_attr_dim = 4
+        self.symbol_onehot_dim = 30
+        self.symbol_model_hidden_dims = [32,]
+        self.rules_dim = 15
         
 
         self.max_epoches = 200
@@ -83,16 +83,15 @@ class Args(object):
         self.test_batch_size = 32
         self.validation_batch_size = 32
 
-        # self.data_dir = './data/paper/ablation/%s' % (self.gener_level)
-        self.data_dir = './data/paper/%s_%d/' % (self.gener_level, self.symbol_onehot_dim)
-        
+        self.data_dir = "./data/paper/warmup_%d/" % (self.symbol_onehot_dim)
+
         self.data_format_str = '%s_visual.pkl'
         
         self.auto_resume = True
 
         self.agent_type = 'rnn_reinforce' # ["rnn_gs", "rnn_reinforce", "transformer_reinforce"]
-        # self.rule = True
-        self.rule = False
+        self.rule = True
+        # self.rule = False
         self.visual, self.symbol = (False, True)
         # self.visual, self.symbol = (True, False)
         assert self.visual ^ self.symbol
@@ -104,12 +103,6 @@ class Args(object):
 
         self.use_constrative = False
 
-        self.symbol_attr_dim = 4
-        # self.symbol_onehot_dim = 20
-        self.symbol_model_hidden_dims = [32,]
-        self.rules_dim = 15
-
-        
 
         self.rnn_gs_speaker_configs = {
             "vocab_size": self.vocab_size, 
@@ -212,19 +205,14 @@ class Args(object):
         }
 
         # self.execution_id = "test"
-
-        # self.execution_id = '%dx%d_else_88_ood_expo_l2_20_seed_0' % (self.message_max_len, self.vocab_size)
-        self.execution_id = '%dx%d_%s_%d_seed_%d' % (self.message_max_len, self.vocab_size, self.gener_level, self.symbol_onehot_dim, self.seed)
-
-
-        # self.execution_id = 'SCL_egg_%dx%d_symbol_rnn_discri_reinforce_vlenmsg_else_88_inpo_20' % (self.message_max_len, self.vocab_size)
+        self.execution_id = '%dx%d_warmup_88_%d' % (self.message_max_len, self.vocab_size, self.symbol_onehot_dim)
         # self.execution_id = 'SCL_egg_%dx%d_symbol_rnn_discri_gs_vlenmsg_ptlistener_r_cs_10k_num' % (self.message_max_len, self.vocab_size)
         # self.execution_id = 'SCL_egg_%dx%d_%dx%d_symbol_1e41e-2cs_rule_10k' % (self.message_max_len, self.vocab_size, self.listener_reset_times, self.listener_reset_cycle)
-        self.dump_root = './dump_paper/' # path to dump results
+        self.dump_root = './dump_paper/'
         self.dump_dir = os.path.join(self.dump_root, self.execution_id)
 
         
-        self.dump_message = dump_message
+        self.dump_message = False
         self.discri_game = True
         
     

@@ -1,4 +1,4 @@
-# EC
+# EC stage 2
 
 To reproduce our expriments, please refer to the following two steps:
 
@@ -16,4 +16,5 @@ To reproduce our expriments, please refer to the following two steps:
 
 	Meaning 2: Dump message of seed `[0, 1, 2, 3, 4, 5, 6, 7]`, on `l2_inpo_20` dataset split.
 
-Other utilities: `pack*.py`. Packing results to `.zip` file.
+Other utilities: `pack*.py` is for extracting and packing the results to a `.zip` file.
+

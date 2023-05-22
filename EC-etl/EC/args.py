@@ -2,11 +2,16 @@ import os
 
 
 class Args(object):
-    def __init__(self, seed=0, gener_level="l1_inpo", dump_message=False, symbol_onehot_dim=20):
-        
+    def __init__(self, seed=0, gener_level="l2_inpo", external_message_mode="rule", src_vr=0, dst_vr=0, dump_message=False):
+        # ["rule", "agent"]
         self.seed = seed
         self.gener_level = gener_level # [l1_inpo, l1_expo, l2_inpo, l2_expo]
-        self.symbol_onehot_dim = symbol_onehot_dim
+        self.external_message_mode = external_message_mode
+        self.src_vr = src_vr
+        self.dst_vr = dst_vr
+        self.symbol_onehot_dim = dst_vr
+
+        
 
         # CUDA part
 
@@ -26,8 +31,8 @@ class Args(object):
         self.speaker_freeze = False
         self.listener_freeze = False
 
-        self.speaker_use_pretrain_model = True
-        self.speaker_pretrain_path = "./dump_paper/4x15_warmup_88_%d/checkpoints/best_epoch.pth" % (self.symbol_onehot_dim)
+        self.speaker_use_pretrain_model = False
+        self.speaker_pretrain_path = "../../EC-stage-2/dump_paper/4x15_warmup_88_%d/checkpoints/best_epoch.pth" % (self.symbol_onehot_dim)
         self.speaker_pretrain_params_key = "speaker"
 
         self.listener_use_pretrain_model = False
@@ -41,8 +46,14 @@ class Args(object):
         assert not(self.max_pooling_message_embedding and self.mlp_pooling_message_embedding)
 
 
-        self.image_embedding_dim = 4 * self.symbol_onehot_dim # 80, 120, 160
-        self.message_embedding_dim = 5 * self.image_embedding_dim if not self.max_pooling_message_embedding and not self.mlp_pooling_message_embedding else 80
+        self.symbol_attr_dim = 4
+        
+        self.symbol_model_hidden_dims = [32,]
+        self.rules_dim = 15
+
+
+        self.image_embedding_dim = 4 * self.symbol_onehot_dim if self.symbol_onehot_dim in [20, 30, 40] else 240
+        self.message_embedding_dim = 5 * self.image_embedding_dim  if not self.max_pooling_message_embedding and not self.mlp_pooling_message_embedding else 80
         
 
         self.message_max_len = 4
@@ -75,7 +86,7 @@ class Args(object):
         self.listener_reset_cycle = 20
         
 
-        self.max_epoches = 200
+        self.max_epoches = 10
         # self.max_epoches = 0
         self.dataloader_num_workers = 8
         self.train_batch_size = 512
@@ -83,10 +94,8 @@ class Args(object):
         self.test_batch_size = 32
         self.validation_batch_size = 32
 
-        # self.data_dir = './data/paper/ablation/%s' % (self.gener_level)
-        self.data_dir = './data/paper/%s_%d/' % (self.gener_level, self.symbol_onehot_dim)
-        
         self.data_format_str = '%s_visual.pkl'
+        self.external_message_format_str = "%s_external_message_%s.pkl"
         
         self.auto_resume = True
 
@@ -98,16 +107,23 @@ class Args(object):
         assert self.visual ^ self.symbol
         self.null_message = False
         self.const_message = False
+        self.use_external_message = True
         self.use_message_max_len = False
 
         self.add_LN = False
 
         self.use_constrative = False
 
-        self.symbol_attr_dim = 4
-        # self.symbol_onehot_dim = 20
-        self.symbol_model_hidden_dims = [32,]
-        self.rules_dim = 15
+        if self.external_message_mode == "rule":
+            self.data_dir = '../../EC-stage-2/data/paper/%s_%d/' % (self.gener_level, self.dst_vr)
+            self.external_message_dir = './build_message/%s_message/%s_%d' % (self.external_message_mode, self.gener_level, self.dst_vr)
+        else:
+            self.data_dir = '../../EC-stage-2/data/paper/%s_%d/' % (self.gener_level, self.dst_vr)
+            self.external_message_dir = './build_message/%s_message/%dx%d_%s_%d_seed_%d_to_%d' % (
+                self.external_message_mode, self.message_max_len, self.vocab_size, self.gener_level, self.src_vr, self.seed, self.dst_vr
+            )
+
+        
 
         
 
@@ -214,13 +230,13 @@ class Args(object):
         # self.execution_id = "test"
 
         # self.execution_id = '%dx%d_else_88_ood_expo_l2_20_seed_0' % (self.message_max_len, self.vocab_size)
-        self.execution_id = '%dx%d_%s_%d_seed_%d' % (self.message_max_len, self.vocab_size, self.gener_level, self.symbol_onehot_dim, self.seed)
+        self.execution_id = '%dx%d_etl_%s_%s_%d_seed_%d_to_%d' % (self.message_max_len, self.vocab_size, self.gener_level, self.external_message_mode, self.src_vr, self.seed, self.dst_vr)
 
 
         # self.execution_id = 'SCL_egg_%dx%d_symbol_rnn_discri_reinforce_vlenmsg_else_88_inpo_20' % (self.message_max_len, self.vocab_size)
         # self.execution_id = 'SCL_egg_%dx%d_symbol_rnn_discri_gs_vlenmsg_ptlistener_r_cs_10k_num' % (self.message_max_len, self.vocab_size)
         # self.execution_id = 'SCL_egg_%dx%d_%dx%d_symbol_1e41e-2cs_rule_10k' % (self.message_max_len, self.vocab_size, self.listener_reset_times, self.listener_reset_cycle)
-        self.dump_root = './dump_paper/' # path to dump results
+        self.dump_root = './dump_paper/'
         self.dump_dir = os.path.join(self.dump_root, self.execution_id)
 
         
