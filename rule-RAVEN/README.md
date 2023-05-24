@@ -1,14 +1,10 @@
 # rule-RAVEN
 
-This folder contains the source code of `rule-RAVEN` dataset. To reproduce the dataset we used in the experiment, please refer to the following steps:
+This folder contains the source code of `rule-RAVEN` dataset. To reproduce the dataset we used in the experiment, please refer to the following step:
 
-1. ``` shell
-	pip install -r requirements.txt # install requirements
-	```
-
-2. ``` shell
-	python main.py # generate all data splits in our paper
-	```
+```shell
+python main.py # generate all data splits in our paper
+```
 
 You can see that the following folders are generated in `./data`:
 

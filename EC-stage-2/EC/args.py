@@ -27,7 +27,7 @@ class Args(object):
         self.listener_freeze = False
 
         self.speaker_use_pretrain_model = True
-        self.speaker_pretrain_path = "./dump_paper/4x15_warmup_88_%d/checkpoints/best_epoch.pth" % (self.symbol_onehot_dim)
+        self.speaker_pretrain_path = "../../EC-stage-1/dump_paper/4x15_warmup_88_%d/checkpoints/best_epoch.pth" % (self.symbol_onehot_dim)
         self.speaker_pretrain_params_key = "speaker"
 
         self.listener_use_pretrain_model = False
