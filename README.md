@@ -1,6 +1,6 @@
 # EC-code
 
-Code for `Emergent Communication for Rules Reasoning`, Neurips 2023 Poster.
+Code for `Emergent Communication for Rules Reasoning`, NeurIPS 2023 Poster.
 To reproduce our experiments, please refer to the following steps:
 
 1. Install libraries.
